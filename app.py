@@ -93,11 +93,15 @@ async def make_request_async(encrypt, region, token, session):
             return decode_protobuf(binary)
     except Exception:
         return None
-
-@app.route('/visit', methods=['GET'])
+        
+@app.route('/visit', methods=['GET', 'POST'])
 async def visit():
-    uid = request.args.get("uid")
-    region = request.args.get("region", "").upper()
+    if request.method == 'POST':
+        uid = request.form.get("uid") or (request.json.get("uid") if request.is_json else None)
+        region = request.form.get("region") or (request.json.get("region") if request.is_json else "").upper()
+    else:
+        uid = request.args.get("uid")
+        region = request.args.get("region", "").upper()
 
     if not all([uid, region]):
         return jsonify({"error": "UID and region are required"}), 400
